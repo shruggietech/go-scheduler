@@ -50,6 +50,57 @@ func TestParse_Rejects(t *testing.T) {
 	}
 }
 
+func TestParse_IntervalAnchor(t *testing.T) {
+	tests := []struct {
+		input       string
+		wantAnchor  time.Time
+		wantSummary string
+	}{
+		{"every 15 minutes starting at 09:00", time.Date(2026, 6, 19, 9, 0, 0, 0, time.UTC), "Every 15 minutes starting at 09:00"},
+		{"every 30 minutes from 9am", time.Date(2026, 6, 19, 9, 0, 0, 0, time.UTC), "Every 30 minutes starting at 09:00"},
+		{"every 2 hours starting at 08:30", time.Date(2026, 6, 19, 8, 30, 0, 0, time.UTC), "Every 2 hours starting at 08:30"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			sch, err := Parse(tt.input, "UTC", now)
+			if err != nil {
+				t.Fatalf("Parse(%q): %v", tt.input, err)
+			}
+			if sch.Anchor == nil || !sch.Anchor.Equal(tt.wantAnchor) {
+				t.Fatalf("anchor = %v, want %v", sch.Anchor, tt.wantAnchor)
+			}
+			if sch.HumanSummary != tt.wantSummary {
+				t.Fatalf("summary = %q, want %q", sch.HumanSummary, tt.wantSummary)
+			}
+		})
+	}
+}
+
+func TestParse_AnchorRejects(t *testing.T) {
+	for _, bad := range []string{
+		"every 15 minutes at 09:00",   // bare 'at' still invalid for sub-daily
+		"every day starting at 09:00", // anchor not valid for daily
+		"every week from 9am",         // anchor not valid for weekly
+		"every 15 minutes starting at 99:99",
+	} {
+		if _, err := Parse(bad, "UTC", now); err == nil {
+			t.Fatalf("expected error for %q", bad)
+		}
+	}
+}
+
+func TestParse_AnchorTimezone(t *testing.T) {
+	// Anchor 09:00 in New York (EDT, -04:00) on now's date → 13:00 UTC.
+	sch, err := Parse("every 15 minutes starting at 09:00", "America/New_York", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := time.Date(2026, 6, 19, 13, 0, 0, 0, time.UTC)
+	if sch.Anchor == nil || !sch.Anchor.Equal(want) {
+		t.Fatalf("anchor = %v, want %v", sch.Anchor, want)
+	}
+}
+
 func TestParse_TimeOfDayVariants(t *testing.T) {
 	for _, in := range []string{"every day at 14:00", "every day at 2:00 PM", "every day at 2pm"} {
 		sch, err := Parse(in, "UTC", now)

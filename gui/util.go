@@ -2,6 +2,7 @@ package gui
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -9,6 +10,10 @@ import (
 )
 
 var errInvalidOneOff = errors.New("one-off time must be RFC3339, e.g. 2026-08-04T09:00:00Z")
+
+// errEmptyField is the inline validation error shown for a required field that
+// is left empty.
+func errEmptyField(field string) error { return fmt.Errorf("%s is required", field) }
 
 func (a *App) showError(err error) {
 	if err == nil {

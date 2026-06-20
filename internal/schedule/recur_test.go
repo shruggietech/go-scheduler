@@ -23,6 +23,39 @@ func TestNextRun_Interval(t *testing.T) {
 	}
 }
 
+func TestNextRun_IntervalAnchored(t *testing.T) {
+	// "every 15 minutes starting at 09:00" must align to :00/:15/:30/:45 regardless of
+	// the evaluation moment — next run after 09:07 is 09:15, not 09:22.
+	sch, err := Parse("every 15 minutes starting at 09:00", "UTC", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	after := time.Date(2026, 6, 19, 9, 7, 0, 0, time.UTC)
+	got, ok, err := NextRun(sch, "UTC", after)
+	if err != nil || !ok {
+		t.Fatalf("NextRun: ok=%v err=%v", ok, err)
+	}
+	if want := time.Date(2026, 6, 19, 9, 15, 0, 0, time.UTC); !got.Equal(want) {
+		t.Fatalf("got %v, want %v (anchored to :15)", got, want)
+	}
+}
+
+func TestNextRun_IntervalUnanchoredUnchanged(t *testing.T) {
+	// Without an anchor clause, behavior matches the creation-aligned default (anchor=now=08:00).
+	sch, err := Parse("every 15 minutes", "UTC", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	after := time.Date(2026, 6, 19, 8, 7, 0, 0, time.UTC)
+	got, ok, err := NextRun(sch, "UTC", after)
+	if err != nil || !ok {
+		t.Fatalf("NextRun: ok=%v err=%v", ok, err)
+	}
+	if want := time.Date(2026, 6, 19, 8, 15, 0, 0, time.UTC); !got.Equal(want) {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+}
+
 func TestNextRun_OrdinalWeekday(t *testing.T) {
 	// "3rd Wednesday of every month at 14:00" — in June 2026 that is June 17.
 	sch, err := Parse("3rd wednesday monthly at 14:00", "America/New_York", time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC))

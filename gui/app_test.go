@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"fyne.io/fyne/v2/test"
-
 	"github.com/shruggietech/go-scheduler/internal/api/server"
 	"github.com/shruggietech/go-scheduler/internal/domain"
 	"github.com/shruggietech/go-scheduler/internal/events"
@@ -14,11 +12,12 @@ import (
 
 // fakeBackend implements Backend with in-memory data for headless UI tests.
 type fakeBackend struct {
-	tasks    []domain.Task
-	groups   []domain.Group
-	alerts   []domain.Alert
-	triggers []domain.Trigger
-	created  int
+	tasks      []domain.Task
+	groups     []domain.Group
+	alerts     []domain.Alert
+	triggers   []domain.Trigger
+	created    int
+	lastCreate server.TaskCreateRequest
 }
 
 func (f *fakeBackend) ListTasks(context.Context, string, string) ([]domain.Task, error) {
@@ -28,8 +27,9 @@ func (f *fakeBackend) ListGroups(context.Context) ([]domain.Group, error) { retu
 func (f *fakeBackend) ListAlerts(context.Context, bool) ([]domain.Alert, error) {
 	return f.alerts, nil
 }
-func (f *fakeBackend) CreateTask(context.Context, server.TaskCreateRequest) (server.TaskResponse, error) {
+func (f *fakeBackend) CreateTask(_ context.Context, req server.TaskCreateRequest) (server.TaskResponse, error) {
 	f.created++
+	f.lastCreate = req
 	return server.TaskResponse{}, nil
 }
 func (f *fakeBackend) UpdateTask(context.Context, string, server.TaskUpdateRequest) (server.TaskResponse, error) {
@@ -61,10 +61,7 @@ func (f *fakeBackend) StreamEvents(ctx context.Context, _ func(events.Event)) er
 }
 
 func TestUI_BuildsAllTabs(t *testing.T) {
-	a := test.NewApp()
-	defer a.Quit()
-
-	ui := NewUI(a, &fakeBackend{
+	ui := NewUI(testApp, &fakeBackend{
 		tasks:  []domain.Task{{ID: "t1", Name: "nightly", State: domain.TaskActive, Enabled: true, Timezone: "UTC"}},
 		groups: []domain.Group{{ID: "g1", Name: "Backups", Enabled: true}},
 		alerts: []domain.Alert{{ID: "a1", Kind: domain.AlertRunFailed, Message: "boom"}},
@@ -82,9 +79,7 @@ func TestUI_BuildsAllTabs(t *testing.T) {
 }
 
 func TestUI_TaskEditorBuilds(t *testing.T) {
-	a := test.NewApp()
-	defer a.Quit()
-	ui := NewUI(a, &fakeBackend{})
+	ui := NewUI(testApp, &fakeBackend{})
 	// Opening the editor must not panic and the window keeps a canvas.
 	ui.showTaskEditor(nil)
 	if ui.win.Canvas() == nil {
@@ -93,9 +88,10 @@ func TestUI_TaskEditorBuilds(t *testing.T) {
 }
 
 func TestUI_AlertBadgeReflectsUnacked(t *testing.T) {
-	a := test.NewApp()
-	defer a.Quit()
-	ui := NewUI(a, &fakeBackend{})
+	ui := NewUI(testApp, &fakeBackend{})
+	// Drive the badge synchronously: the production OnChange marshals through
+	// fyne.Do on another goroutine, which would race with the assertion below.
+	ui.model.OnChange = nil
 	ui.model.ApplyEvent(events.Event{Kind: events.KindAlert, Alert: &domain.Alert{ID: "x", Acknowledged: false}})
 	ui.updateAlertBadge()
 	if ui.alertsTab.Text != "Alerts (1)" {

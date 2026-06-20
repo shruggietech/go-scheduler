@@ -13,6 +13,9 @@ Governing documents:
 - Plan: `specs/001-task-scheduler/plan.md`
 - Design: `specs/001-task-scheduler/research.md`, `data-model.md`, `contracts/`, `quickstart.md`
 
+Active feature:
+- Plan: `specs/002-gui-task-editor-ux/plan.md` (GUI task-editor UX overhaul + interval anchor)
+
 Key conventions: internal scheduling in UTC; per-task IANA timezone with DST (next-valid /
 first-occurrence); recurrence via RFC 5545 RRULE (rrule-go) behind a human-readable layer;
 injected `Clock` interface (no direct `time.Now()` in engine code); `log/slog` structured logs;
