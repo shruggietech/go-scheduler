@@ -29,11 +29,11 @@ implementation and testing.
 
 **Purpose**: Project initialization and tooling.
 
-- [ ] T001 Initialize Go module `go-scheduler` and create the directory skeleton (`cmd/{goschedd,gosched,gosched-gui}`, `internal/`, `gui/`, `test/integration/`) per plan.md
-- [ ] T002 Add and pin dependencies in `go.mod`: `fyne.io/fyne/v2`, `github.com/kardianos/service`, `modernc.org/sqlite`, `github.com/teambition/rrule-go`, `github.com/spf13/cobra`, `github.com/Microsoft/go-winio`, plus `time/tzdata`
-- [ ] T003 [P] Configure `golangci-lint` (`.golangci.yml`) and a `Makefile`/`Taskfile` with `fmt`, `vet`, `lint`, `test`, `bench`, `build` targets
-- [ ] T004 [P] Configure CI to run `gofmt -l`, `go vet`, `golangci-lint`, `go test -race`, coverage gate (≥80% core), and dispatch benchmark on Linux/macOS/Windows
-- [ ] T005 [P] Add `internal/platform` build-tagged stubs for per-OS data directories and windowless process-spawn flags (`platform_windows.go`, `platform_unix.go`)
+- [x] T001 Initialize Go module `go-scheduler` and create the directory skeleton (`cmd/{goschedd,gosched,gosched-gui}`, `internal/`, `gui/`, `test/integration/`) per plan.md
+- [x] T002 Add and pin dependencies in `go.mod`: `fyne.io/fyne/v2`, `github.com/kardianos/service`, `modernc.org/sqlite`, `github.com/teambition/rrule-go`, `github.com/spf13/cobra`, `github.com/Microsoft/go-winio`, plus `time/tzdata`
+- [x] T003 [P] Configure `golangci-lint` (`.golangci.yml`) and a `Makefile`/`Taskfile` with `fmt`, `vet`, `lint`, `test`, `bench`, `build` targets
+- [x] T004 [P] Configure CI to run `gofmt -l`, `go vet`, `golangci-lint`, `go test -race`, coverage gate (≥80% core), and dispatch benchmark on Linux/macOS/Windows
+- [x] T005 [P] Add `internal/platform` build-tagged stubs for per-OS data directories and windowless process-spawn flags (`platform_windows.go`, `platform_unix.go`)
 
 ---
 
@@ -43,11 +43,11 @@ implementation and testing.
 
 **⚠️ CRITICAL**: No user story work begins until this phase is complete.
 
-- [ ] T006 [P] Define the `Clock` interface (`Now`, `After`, `NewTimer`) with real + fake implementations in `internal/engine/clock.go`
-- [ ] T007 [P] Unit-test the fake `Clock` (deterministic advance/timers) in `internal/engine/clock_test.go`
-- [ ] T008 [P] Implement config schema, defaults, and fail-fast validation in `internal/config/config.go` (data dir, IPC path, admin group, default tz, log level/format, output cap, worker-pool size)
-- [ ] T009 [P] Unit-test config validation (bad tz, bad paths, defaults) in `internal/config/config_test.go`
-- [ ] T010 [P] Set up `log/slog` structured logging (JSON + human handlers, consistent fields) in `internal/config/logging.go`
+- [x] T006 [P] Define the `Clock` interface (`Now`, `After`, `NewTimer`) with real + fake implementations in `internal/engine/clock.go`
+- [x] T007 [P] Unit-test the fake `Clock` (deterministic advance/timers) in `internal/engine/clock_test.go`
+- [x] T008 [P] Implement config schema, defaults, and fail-fast validation in `internal/config/config.go` (data dir, IPC path, admin group, default tz, log level/format, output cap, worker-pool size)
+- [x] T009 [P] Unit-test config validation (bad tz, bad paths, defaults) in `internal/config/config_test.go`
+- [x] T010 [P] Set up `log/slog` structured logging (JSON + human handlers, consistent fields) in `internal/config/logging.go`
 - [ ] T011 Implement SQLite store bootstrap + schema migrations (modernc.org/sqlite) in `internal/store/store.go` and `internal/store/migrations/`
 - [ ] T012 [P] Implement base domain models Group, Task, Schedule, Run, Alert (UTC timestamps, enums) in `internal/task/` and `internal/schedule/types.go`
 - [ ] T013 Implement store CRUD for Group, Task, Schedule, Run, Alert (transactional) in `internal/store/*.go`
