@@ -5,6 +5,7 @@ package platform
 import (
 	"os/exec"
 	"runtime"
+	"syscall"
 )
 
 func dataDir() string {
@@ -16,3 +17,12 @@ func dataDir() string {
 
 // hideConsole is a no-op on Unix: child processes do not create console windows.
 func hideConsole(_ *exec.Cmd) {}
+
+// detachProcess starts the child in a new session so it is not tied to the
+// launcher's controlling terminal and survives the launcher exiting.
+func detachProcess(cmd *exec.Cmd) {
+	if cmd.SysProcAttr == nil {
+		cmd.SysProcAttr = &syscall.SysProcAttr{}
+	}
+	cmd.SysProcAttr.Setsid = true
+}

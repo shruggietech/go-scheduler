@@ -100,5 +100,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     window) needs cgo; a cgo-free stub keeps `go build ./...` working everywhere.
   - CI builds the GUI with cgo + OpenGL and runs the headless GUI tests; releases
     publish `gosched-gui` for Linux, macOS, and Windows (windowless on Windows).
+- **Zero-config desktop experience:**
+  - `internal/autostart` — the GUI now starts the background daemon automatically
+    (detached, windowless) if none is reachable, and reuses an already-running one
+    (e.g. the installed service); the daemon's single-instance lock prevents
+    duplicates.
+  - Releases now publish a self-contained `go-scheduler-desktop_<os>_<arch>`
+    archive bundling the GUI + daemon + CLI, so desktop users download one file and
+    just run the GUI.
 
 [Unreleased]: https://github.com/shruggietech/go-scheduler/commits/main

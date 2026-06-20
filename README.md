@@ -59,23 +59,32 @@ specs/      spec-driven development artifacts (spec, plan, tasks, contracts)
 
 ## Install
 
-Each [release](https://github.com/shruggietech/go-scheduler/releases/latest) ships **two
-archives** per platform:
+Each [release](https://github.com/shruggietech/go-scheduler/releases/latest) ships two kinds of
+archive. Verify downloads against `SHA256SUMS.txt`.
 
-- `go-scheduler_<ver>_<os>_<arch>` — the **daemon** (`goschedd`) + **CLI** (`gosched`).
-  Provided for Linux, macOS, and Windows on amd64 and arm64.
-- `go-scheduler-gui_<ver>_<os>_<arch>` — the **desktop GUI** (`gosched-gui`). Provided for
-  Linux, macOS, and Windows (amd64).
+### Desktop (recommended) — one self-contained download
 
-The CLI and GUI are clients that talk to the daemon, so you need the daemon archive at minimum
-(and both if you want the GUI). Verify downloads against `SHA256SUMS.txt`, extract, then:
+`go-scheduler-desktop_<ver>_<os>_<arch>` bundles the **GUI + daemon + CLI** together (Linux,
+macOS, Windows). Extract it and run the GUI — it **auto-starts the background daemon** the first
+time, so there's nothing to configure:
 
 ```sh
-sudo ./gosched service install   # admin/root required; registers the system service (start-on-boot)
+./gosched-gui        # opens the window; starts the daemon in the background if needed
+```
+
+> The auto-started daemon keeps running so your tasks fire even after you close the window. For
+> a daemon that also **starts on boot**, install it as a system service (below).
+
+### Server / headless — daemon + CLI only
+
+`go-scheduler_<ver>_<os>_<arch>` contains just `goschedd` + `gosched` (all platforms, amd64 +
+arm64). Register the service to start on boot:
+
+```sh
+sudo ./gosched service install   # admin/root required
 sudo ./gosched service start
 ./gosched health                 # expect: daemon ok
 ./gosched task add hello --command /usr/bin/true --schedule "every weekday at 09:00"
-./gosched gui                    # launch the desktop GUI (needs gosched-gui alongside gosched)
 ```
 
 **Windows users:** see the step-by-step [Windows install guide](docs/INSTALL-windows.md).

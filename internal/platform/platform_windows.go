@@ -28,3 +28,14 @@ func hideConsole(cmd *exec.Cmd) {
 	cmd.SysProcAttr.HideWindow = true
 	cmd.SysProcAttr.CreationFlags |= createNoWindow
 }
+
+// createNewProcessGroup detaches the child from the parent's Ctrl-C/console
+// group so it survives the launcher.
+const createNewProcessGroup = 0x00000200
+
+func detachProcess(cmd *exec.Cmd) {
+	if cmd.SysProcAttr == nil {
+		cmd.SysProcAttr = &syscall.SysProcAttr{}
+	}
+	cmd.SysProcAttr.CreationFlags |= createNewProcessGroup
+}

@@ -60,20 +60,22 @@ jobs:
           name: ${{ github.ref_name }}
           generate_release_notes: true
           body: |
-            Cross-platform **go-scheduler** binaries (daemon `goschedd` + CLI `gosched`).
+            Cross-platform **go-scheduler**.
 
-            Each archive contains both binaries plus README, LICENSE, and CHANGELOG.
-            Verify downloads against `SHA256SUMS.txt`.
+            **Desktop users — download `go-scheduler-desktop_<os>_<arch>`.** It is
+            self-contained (GUI + daemon + CLI). Just run `gosched-gui` — it starts the
+            background daemon automatically the first time, no setup required.
 
-            Install: extract the archive for your platform, then register the service:
+            **Servers / headless — download `go-scheduler_<os>_<arch>`** (daemon + CLI only).
+            Register it to start on boot:
 
             ```
             sudo ./gosched service install   # admin/root required
             sudo ./gosched service start
             ```
 
-            > The Material Design desktop GUI (`gosched-gui`) requires a per-OS native
-            > build (Fyne/OpenGL) and is not yet included in these archives.
+            Verify downloads against `SHA256SUMS.txt`. See the README for details and the
+            Windows install guide.
           files: |
             dist/*.tar.gz
             dist/*.zip
@@ -114,7 +116,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgl1-mesa-dev xorg-dev libxkbcommon-dev
 
-      - name: Build the desktop GUI (cgo)
+      - name: Build the self-contained desktop bundle (GUI + daemon + CLI)
         shell: bash
         env:
           CGO_ENABLED: "1"
@@ -122,10 +124,14 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
         run: |
           VERSION="${GITHUB_REF_NAME}"
-          LD="-s -w -X github.com/shruggietech/go-scheduler/internal/buildinfo.Version=${VERSION} ${{ matrix.ldflags }}"
-          stage="go-scheduler-gui_${VERSION}_${{ matrix.goos }}_${{ matrix.goarch }}"
+          BASE="-s -w -X github.com/shruggietech/go-scheduler/internal/buildinfo.Version=${VERSION}"
+          stage="go-scheduler-desktop_${VERSION}_${{ matrix.goos }}_${{ matrix.goarch }}"
           mkdir -p "$stage"
-          go build -ldflags "$LD" -o "$stage/gosched-gui${{ matrix.ext }}" ./cmd/gosched-gui
+          # GUI: windowless on Windows. It auto-starts the daemon if none is running.
+          go build -ldflags "$BASE ${{ matrix.ldflags }}" -o "$stage/gosched-gui${{ matrix.ext }}" ./cmd/gosched-gui
+          # Bundle the daemon and CLI so the GUI is self-contained.
+          go build -ldflags "$BASE" -o "$stage/goschedd${{ matrix.ext }}" ./cmd/goschedd
+          go build -ldflags "$BASE" -o "$stage/gosched${{ matrix.ext }}" ./cmd/gosched
           cp README.md LICENSE CHANGELOG.md "$stage/"
           mkdir -p dist
           if [ "${{ matrix.goos }}" = "windows" ]; then

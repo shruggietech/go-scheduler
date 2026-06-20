@@ -1,110 +1,80 @@
 # Installing go-scheduler on Windows
 
-go-scheduler has three programs:
+## Quick start (desktop) — one download
 
-| Program | What it does | Which archive |
-|---------|--------------|---------------|
-| `goschedd.exe` | The **daemon/service** — runs your scheduled tasks in the background | `go-scheduler_<ver>_windows_amd64.zip` |
-| `gosched.exe` | The **CLI** — create and manage tasks, groups, triggers | `go-scheduler_<ver>_windows_amd64.zip` |
-| `gosched-gui.exe` | The **desktop GUI** — a window for managing everything visually | `go-scheduler-gui_<ver>_windows_amd64.zip` |
+1. From the [latest release](https://github.com/shruggietech/go-scheduler/releases/latest),
+   download **`go-scheduler-desktop_<ver>_windows_amd64.zip`**. It is self-contained — it
+   includes the GUI **and** the daemon and CLI:
 
-The CLI and GUI are **clients**: they talk to the daemon. Nothing runs until the daemon is
-installed and started, so you need **both** archives.
+   ```
+   gosched-gui.exe   # the desktop app
+   goschedd.exe      # the background daemon (started automatically)
+   gosched.exe       # the command-line tool (optional)
+   ```
 
-## 1. Download
+2. (Recommended) Verify the download against `SHA256SUMS.txt`:
 
-From the [latest release](https://github.com/shruggietech/go-scheduler/releases/latest), download:
+   ```powershell
+   Get-FileHash .\go-scheduler-desktop_*_windows_amd64.zip -Algorithm SHA256
+   ```
 
-- `go-scheduler_<ver>_windows_amd64.zip` (daemon + CLI)
-- `go-scheduler-gui_<ver>_windows_amd64.zip` (GUI)
+3. Extract the zip (keep all three `.exe` files together in one folder).
 
-(Use the `arm64` archives instead if you're on a Windows-on-ARM device. The GUI is currently
-published for `amd64` only.)
+4. **Run `gosched-gui.exe`.** That's it — the GUI starts the background daemon automatically the
+   first time it can't find one running, so there's no setup. No console window appears.
 
-## 2. Verify the downloads (recommended)
+The background daemon keeps running after you close the window, so your scheduled tasks keep
+firing. To stop it, use Task Manager (end `goschedd.exe`) or `.\gosched.exe service stop` if you
+installed it as a service (below).
 
-The release includes `SHA256SUMS.txt`. In PowerShell:
+## Start on boot (optional)
 
-```powershell
-Get-FileHash .\go-scheduler_*_windows_amd64.zip -Algorithm SHA256
-```
-
-Compare the printed hash against the matching line in `SHA256SUMS.txt`.
-
-## 3. Extract
-
-Extract both archives. The simplest layout is to put all three `.exe` files in one folder,
-for example `C:\Tools\go-scheduler\`:
-
-```
-C:\Tools\go-scheduler\
-  goschedd.exe
-  gosched.exe
-  gosched-gui.exe
-```
-
-> Keeping `gosched-gui.exe` next to `gosched.exe` lets `gosched gui` find and launch it, and
-> lets the service installer find `goschedd.exe`.
-
-## 4. Install and start the service (requires Administrator)
-
-Open **PowerShell as Administrator**, `cd` into the folder, then:
+The auto-started daemon runs until the machine is restarted. If you want your tasks to keep
+running **across reboots without anyone logging in**, install it as a Windows service. Open
+**PowerShell as Administrator**, `cd` into the folder, then:
 
 ```powershell
 .\gosched.exe service install     # registers the Windows service (admin required)
 .\gosched.exe service start
-.\gosched.exe health              # expect: daemon ok (version 0.2.0)
+.\gosched.exe service status      # expect: running
 ```
 
-The service is registered to start on boot, so your tasks keep running across reboots without
-anyone being logged in.
+Once the service is installed, the GUI detects it and reuses it (it won't start a second
+daemon — a single-instance lock prevents that).
 
-## 5. Use it
-
-**GUI** — just run it (no console window appears):
+## Using the CLI (optional)
 
 ```powershell
-.\gosched-gui.exe
-```
+.\gosched.exe health              # daemon ok (version ...)
 
-…or launch it from the CLI:
-
-```powershell
-.\gosched.exe gui
-```
-
-**CLI** — for example:
-
-```powershell
-# A recurring task (note: quote the schedule)
+# A recurring task (quote the schedule)
 .\gosched.exe task add backup --command "C:\Windows\System32\cmd.exe" --arg "/c" --arg "echo backup" --schedule "every weekday at 09:00"
 
 # A one-off reminder
 .\gosched.exe task add bday --command "C:\Windows\System32\cmd.exe" --arg "/c" --arg "echo happy birthday" --at "2026-08-04T09:00:00Z"
 
 .\gosched.exe task list
-.\gosched.exe runs               # run history
-.\gosched.exe alerts --unacked   # alerts (overlaps, failures, missed runs)
+.\gosched.exe runs                # run history
+.\gosched.exe alerts --unacked    # overlaps, failures, missed runs
 ```
 
-## Managing / removing the service
+## Removing it
 
 ```powershell
-.\gosched.exe service status
 .\gosched.exe service stop
-.\gosched.exe service uninstall   # admin required
+.\gosched.exe service uninstall   # admin required (only if you installed the service)
 ```
+
+Then delete the folder.
 
 ## Troubleshooting
 
+- **The GUI opens but shows nothing / "daemon unreachable"** → the daemon didn't start. Make
+  sure `goschedd.exe` is in the same folder as `gosched-gui.exe`. You can start it manually with
+  `.\gosched.exe service start` (if installed) or just rerun `gosched-gui.exe`.
 - **`service install` fails with an access/privilege error** → run PowerShell **as
   Administrator**.
-- **`gosched health` says the daemon is unreachable** → make sure the service is running
-  (`.\gosched.exe service status`); start it with `.\gosched.exe service start`.
-- **The GUI opens but shows nothing / errors** → the daemon isn't running, or isn't reachable.
-  Start it (step 4) and reopen the GUI. The GUI reconnects to the live event stream
-  automatically.
-- **`gosched gui` says the GUI binary wasn't found** → put `gosched-gui.exe` in the same folder
-  as `gosched.exe` (or run `gosched-gui.exe` directly).
-- **SmartScreen / antivirus warning** → these binaries are unsigned. Verify the SHA-256 hash
-  (step 2) and allow it if it matches.
+- **SmartScreen / antivirus warning** → these binaries are unsigned. Verify the SHA-256 hash and
+  allow it if it matches.
+- **Tasks aren't running after a reboot** → the auto-started daemon does not survive reboots;
+  install the service (see *Start on boot*) for that.
