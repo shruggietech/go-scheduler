@@ -73,20 +73,20 @@ and confirm resumption.
 
 ### Tests for User Story 1
 
-- [ ] T020 [P] [US1] Unit-test human-readable schedule parsing + plain-language summary in `internal/schedule/parse_test.go`
-- [ ] T021 [P] [US1] Unit-test RRULE next-run for interval and ordinal-weekday ("3rd Wednesday monthly") in `internal/schedule/recur_test.go`
-- [ ] T022 [P] [US1] Unit-test one-off scheduling + past-time rejection + post-run `completed` state in `internal/schedule/oneoff_test.go`
-- [ ] T023 [P] [US1] Unit-test timezone + DST resolution (next-valid spring-forward, first-occurrence fall-back) in `internal/timezone/dst_test.go`
+- [x] T020 [P] [US1] Unit-test human-readable schedule parsing + plain-language summary in `internal/schedule/parse_test.go`
+- [x] T021 [P] [US1] Unit-test RRULE next-run for interval and ordinal-weekday ("3rd Wednesday monthly") in `internal/schedule/recur_test.go`
+- [x] T022 [P] [US1] Unit-test one-off scheduling + past-time rejection + post-run `completed` state in `internal/schedule/oneoff_test.go`
+- [x] T023 [P] [US1] Unit-test timezone + DST resolution (next-valid spring-forward, first-occurrence fall-back) in `internal/timezone/dst_test.go`
 - [ ] T024 [P] [US1] Unit-test all three overlap policies — `queue_one` (queue once, warn, drop extras), `skip`, `allow_concurrent` — in `internal/engine/overlap_test.go`
 - [ ] T025 [P] [US1] Contract-test `POST /v1/tasks`, `POST /v1/schedules:preview`, `POST /v1/tasks/{id}:run-now` in `internal/api/server/tasks_test.go`
 - [ ] T026 [US1] Integration-test: create recurring + one-off task → fake clock advances → correct runs recorded; restart daemon → schedule resumes, in `test/integration/scheduling_test.go`
-- [ ] T074 [P] [US1] **Cron-parity equivalence suite** (SC-002): map representative cron patterns to human-readable configs and assert matching run times in `internal/schedule/cronparity_test.go`
+- [x] T074 [P] [US1] **Cron-parity equivalence suite** (SC-002): map representative cron patterns to human-readable configs and assert matching run times in `internal/schedule/cronparity_test.go`
 
 ### Implementation for User Story 1
 
-- [ ] T027 [P] [US1] Implement timezone + DST resolver (UTC conversion, next-valid/first-occurrence rules) in `internal/timezone/timezone.go`
-- [ ] T028 [US1] Implement schedule model: RRULE mapping (rrule-go), one-off, next-run computation in task tz → UTC in `internal/schedule/recur.go`
-- [ ] T029 [US1] Implement human-readable parse + summarize + preview in `internal/schedule/parse.go`
+- [x] T027 [P] [US1] Implement timezone + DST resolver (UTC conversion, next-valid/first-occurrence rules) in `internal/timezone/timezone.go`
+- [x] T028 [US1] Implement schedule model: RRULE mapping (rrule-go), one-off, next-run computation in task tz → UTC in `internal/schedule/recur.go`
+- [x] T029 [US1] Implement human-readable parse + summarize + preview in `internal/schedule/parse.go`
 - [ ] T030 [US1] Implement scheduling engine: timer-driven loop + dispatcher + bounded worker pool with `context` cancellation/drain in `internal/engine/engine.go`
 - [ ] T031 [US1] Implement all three configurable overlap policies — `queue_one` (default: queue one pending + warning log + Alert creation hook), `skip`, and `allow_concurrent` — in `internal/engine/overlap.go`
 - [ ] T032 [US1] Implement executor: spawn command **windowless** (CREATE_NO_WINDOW/HideWindow), capture stdout/stderr (bounded), write Run record, in `internal/executor/executor.go`
