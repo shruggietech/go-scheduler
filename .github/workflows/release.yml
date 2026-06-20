@@ -124,7 +124,10 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
+          # -64 is required: without it goversioninfo emits a 32-bit (i386)
+          # resource that the amd64 linker rejects ("incompatible architecture").
           go run github.com/josephspurrier/goversioninfo/cmd/goversioninfo@v1.4.1 \
+            -64 \
             -icon=cmd/gosched-gui/icon.ico \
             -o=cmd/gosched-gui/resource_windows_amd64.syso \
             cmd/gosched-gui/versioninfo.json
