@@ -66,7 +66,9 @@ func NewUI(fyneApp fyne.App, backend Backend) *App {
 		backend: backend,
 		model:   viewmodel.New(backend),
 	}
+	fyneApp.SetIcon(appIcon)
 	a.win = fyneApp.NewWindow("go-scheduler")
+	a.win.SetIcon(appIcon)
 	a.win.Resize(fyne.NewSize(960, 640))
 	a.win.SetContent(a.buildRoot())
 	a.model.OnChange = func() { fyne.Do(a.onModelChange) }
