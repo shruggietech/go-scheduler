@@ -1,0 +1,34 @@
+# Binaries / build output
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test & coverage artifacts
+*.test
+*.out
+coverage.*
+
+# Go workspace / module cache
+go.work
+go.work.sum
+vendor/
+
+# Local runtime data (SQLite store, sockets, logs)
+*.db
+*.db-shm
+*.db-wal
+*.sock
+*.log
+
+# Agent folders — may contain credentials/auth tokens (flagged by spec-kit init)
+.claude/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
