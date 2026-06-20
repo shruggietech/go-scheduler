@@ -47,6 +47,7 @@ type Engine struct {
 	runCtx       context.Context
 	runWG        sync.WaitGroup // tracks in-flight runs for graceful drain
 	onRun        func(domain.Run)
+	onAlert      func(domain.Alert)
 	onCompletion func(sourceTaskID string, outcome domain.RunOutcome, eventKey string, now time.Time)
 	onStartup    func()
 }
@@ -73,6 +74,10 @@ func New(st *store.Store, clk clock.Clock, runner Runner, log *slog.Logger, work
 // SetOnRun registers a callback invoked after each run is recorded (used for
 // alerts/event streaming and for test synchronization).
 func (e *Engine) SetOnRun(f func(domain.Run)) { e.onRun = f }
+
+// SetOnAlert registers a callback invoked after each alert is raised (used to
+// stream alerts to GUI clients).
+func (e *Engine) SetOnAlert(f func(domain.Alert)) { e.onAlert = f }
 
 // SetCompletionHook registers a callback invoked after a run completes with a
 // success/failure outcome (used to fire event triggers). eventKey is the run ID.
@@ -329,5 +334,8 @@ func (e *Engine) raiseAlert(taskID string, sev domain.AlertSeverity, kind domain
 	a := domain.Alert{TaskID: taskID, Severity: sev, Kind: kind, Message: msg}
 	if err := e.store.CreateAlert(&a); err != nil {
 		e.log.Error("engine: create alert", "err", err)
+	}
+	if e.onAlert != nil {
+		e.onAlert(a)
 	}
 }

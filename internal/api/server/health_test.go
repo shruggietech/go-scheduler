@@ -18,7 +18,7 @@ func newTestServer(t *testing.T) *Server {
 	}
 	t.Cleanup(func() { _ = st.Close() })
 	log := config.NewLogger(config.Default(), discard{})
-	return New(st, nil, log)
+	return New(st, nil, nil, log)
 }
 
 func TestHealth_OK(t *testing.T) {

@@ -112,3 +112,25 @@ jobs:
             echo "building $os/$arch"
             GOOS=$os GOARCH=$arch go build -o /dev/null ./cmd/goschedd ./cmd/gosched
           done
+
+  gui:
+    name: GUI build & test (cgo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Install Fyne build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev xorg-dev libxkbcommon-dev
+      - name: Build GUI (cgo + OpenGL driver)
+        env:
+          CGO_ENABLED: "1"
+        run: go build -o /dev/null ./cmd/gosched-gui
+      - name: Test GUI (headless)
+        env:
+          CGO_ENABLED: "1"
+        run: go test ./gui/...

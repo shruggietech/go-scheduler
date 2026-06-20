@@ -40,9 +40,17 @@ build-daemon:
 build-cli:
 	$(GO) build -o bin/gosched ./cmd/gosched
 
-# GUI: on Windows add $(GUI_LDFLAGS_WINDOWS) so no console window appears.
+# GUI: requires cgo + a C toolchain and OpenGL/X11 dev libraries (Fyne).
+# On Windows add $(GUI_LDFLAGS_WINDOWS) so no console window appears.
 build-gui:
-	$(GO) build -o bin/gosched-gui ./cmd/gosched-gui
+	CGO_ENABLED=1 $(GO) build -o bin/gosched-gui ./cmd/gosched-gui
+
+build-gui-windows:
+	CGO_ENABLED=1 GOOS=windows $(GO) build -ldflags "$(GUI_LDFLAGS_WINDOWS)" -o bin/gosched-gui.exe ./cmd/gosched-gui
+
+# Headless GUI tests run without a display or OpenGL (Fyne test driver).
+test-gui:
+	$(GO) test ./gui/...
 
 tidy:
 	$(GO) mod tidy

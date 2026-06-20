@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/shruggietech/go-scheduler/internal/buildinfo"
+	"github.com/shruggietech/go-scheduler/internal/events"
 	"github.com/shruggietech/go-scheduler/internal/store"
 )
 
@@ -21,15 +22,17 @@ type Scheduler interface {
 
 // Server holds dependencies and the route mux.
 type Server struct {
-	store *store.Store
-	sched Scheduler
-	log   *slog.Logger
-	mux   *http.ServeMux
+	store  *store.Store
+	sched  Scheduler
+	broker *events.Broker
+	log    *slog.Logger
+	mux    *http.ServeMux
 }
 
-// New constructs a Server and registers routes. sched may be nil.
-func New(st *store.Store, sched Scheduler, log *slog.Logger) *Server {
-	s := &Server{store: st, sched: sched, log: log, mux: http.NewServeMux()}
+// New constructs a Server and registers routes. sched and broker may be nil
+// (e.g. in tests that exercise only persistence-backed endpoints).
+func New(st *store.Store, sched Scheduler, broker *events.Broker, log *slog.Logger) *Server {
+	s := &Server{store: st, sched: sched, broker: broker, log: log, mux: http.NewServeMux()}
 	s.routes()
 	return s
 }
@@ -66,6 +69,9 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /v1/runs", s.handleListRuns)
 	s.mux.HandleFunc("GET /v1/alerts", s.handleListAlerts)
 	s.mux.HandleFunc("POST /v1/alerts/{id}/ack", s.handleAckAlert)
+
+	s.mux.HandleFunc("GET /v1/calendar", s.handleCalendar)
+	s.mux.HandleFunc("GET /v1/events", s.handleEvents)
 
 	// Fallback: unmatched routes return the consistent error envelope.
 	s.mux.HandleFunc("/", s.handleNotFound)

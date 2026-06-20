@@ -17,6 +17,7 @@ import (
 	"github.com/shruggietech/go-scheduler/internal/clock"
 	"github.com/shruggietech/go-scheduler/internal/config"
 	"github.com/shruggietech/go-scheduler/internal/engine"
+	"github.com/shruggietech/go-scheduler/internal/events"
 	"github.com/shruggietech/go-scheduler/internal/executor"
 	"github.com/shruggietech/go-scheduler/internal/ipc"
 	"github.com/shruggietech/go-scheduler/internal/lock"
@@ -75,8 +76,11 @@ func runDaemon(ctx context.Context, cfg config.Config) error {
 	}
 	defer ln.Close()
 
-	// Scheduling engine + event-trigger dispatcher.
+	// Scheduling engine + event-trigger dispatcher + live-event broker.
+	broker := events.NewBroker()
 	eng := engine.New(st, clock.NewReal(), executor.New(cfg.OutputCapBytes), log, cfg.WorkerPoolSize)
+	eng.SetOnRun(broker.PublishRun)
+	eng.SetOnAlert(broker.PublishAlert)
 	disp := trigger.New(st, eng.FireEvent, log)
 	eng.SetCompletionHook(disp.OnCompletion)
 	eng.SetStartupHook(disp.RecoverPending)
@@ -84,7 +88,7 @@ func runDaemon(ctx context.Context, cfg config.Config) error {
 	go func() { engErr <- eng.Start(ctx) }()
 
 	srv := &http.Server{
-		Handler:           server.New(st, eng, log).Handler(),
+		Handler:           server.New(st, eng, broker, log).Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
