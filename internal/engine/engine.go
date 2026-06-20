@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/shruggietech/go-scheduler/internal/catchup"
 	"github.com/shruggietech/go-scheduler/internal/clock"
 	"github.com/shruggietech/go-scheduler/internal/domain"
 	"github.com/shruggietech/go-scheduler/internal/schedule"
@@ -116,6 +117,7 @@ func (e *Engine) Reload() {
 func (e *Engine) Start(ctx context.Context) error {
 	e.runCtx = ctx
 	e.recompute(e.clk.Now())
+	e.runCatchup(e.clk.Now())
 	if e.onStartup != nil {
 		e.onStartup()
 	}
@@ -178,6 +180,39 @@ func (e *Engine) recompute(now time.Time) {
 		}
 	}
 	e.next = newNext
+}
+
+// runCatchup performs one catch-up run per eligible task that missed scheduled
+// runs during downtime. The catch-up run is recorded at `now` (so a subsequent
+// restart does not re-trigger it) and honors the task's overlap policy via
+// dispatch. Normal scheduling (computed in recompute) resumes afterward.
+func (e *Engine) runCatchup(now time.Time) {
+	e.mu.Lock()
+	tasks := make([]taskCtx, 0, len(e.tasks))
+	for _, tc := range e.tasks {
+		tasks = append(tasks, tc)
+	}
+	e.mu.Unlock()
+
+	for _, tc := range tasks {
+		runs, err := e.store.ListRuns(tc.task.ID, 1)
+		if err != nil || len(runs) == 0 {
+			continue // never run → nothing to catch up
+		}
+		dec, err := catchup.Evaluate(tc.sch, tc.task.Timezone, runs[0].ScheduledFor, true, tc.task.CatchupPolicy, now)
+		if err != nil {
+			e.log.Error("engine: catchup evaluate", "task", tc.task.ID, "err", err)
+			continue
+		}
+		if !dec.ShouldCatchUp {
+			continue
+		}
+		e.log.Warn("missed run(s) during downtime; performing one catch-up",
+			"task", tc.task.ID, "name", tc.task.Name, "first_missed", dec.FirstMissed)
+		e.raiseAlert(tc.task.ID, domain.SeverityWarning, domain.AlertMissedRun,
+			"missed run(s) during downtime; running one catch-up")
+		e.dispatch(tc.task, now, domain.TriggerCatchup)
+	}
 }
 
 // untilNext returns the duration until the earliest scheduled run, and whether

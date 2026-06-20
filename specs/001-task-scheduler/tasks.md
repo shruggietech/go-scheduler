@@ -195,13 +195,13 @@ per-task configurable (`one`/`none`).
 
 ### Tests for User Story 5
 
-- [ ] T063 [P] [US5] Unit-test missed-run detection + one-catchup vs none + overlap interaction (fake clock) in `internal/catchup/catchup_test.go`
-- [ ] T064 [US5] Integration-test downtime → exactly one catch-up → resume in `test/integration/catchup_test.go`
+- [x] T063 [P] [US5] Unit-test missed-run detection + one-catchup vs none + overlap interaction (fake clock) in `internal/catchup/catchup_test.go`
+- [x] T064 [US5] Integration-test downtime → exactly one catch-up → resume in `test/integration/catchup_test.go`
 
 ### Implementation for User Story 5
 
-- [ ] T065 [US5] Implement catch-up detection (last-run vs schedule) + one-run-per-task policy honoring overlap in `internal/catchup/catchup.go`
-- [ ] T066 [US5] Wire catch-up evaluation into engine startup; emit `missed_run` alert + `caught_up` Run records in `internal/engine/engine.go`
+- [x] T065 [US5] Implement catch-up detection (last-run vs schedule) + one-run-per-task policy honoring overlap in `internal/catchup/catchup.go`
+- [x] T066 [US5] Wire catch-up evaluation into engine startup; emit `missed_run` alert + `caught_up` Run records in `internal/engine/engine.go`
 
 **Checkpoint**: All user stories independently functional.
 

@@ -67,5 +67,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Verified end-to-end: source completion fires the target once (recorded as an
     `event` run); duplicates within the window are de-duplicated.
   - Note: the GUI trigger editor field (T062) is deferred until the US2 GUI exists.
+- **User Story 5 — Downtime catch-up (Phase 7, tasks T063–T066):**
+  - `internal/catchup` — pure detection: given a task's schedule, last run, and
+    policy, decide whether a scheduled run was missed during downtime.
+  - Engine startup performs at most one catch-up run per eligible task (recorded
+    as a `catchup` trigger at startup time, so a restart never re-triggers it),
+    raises a `missed_run` alert, then resumes normal scheduling. Honors the
+    per-task catch-up policy (`one` / `none`) and the overlap policy via dispatch.
+  - Verified end-to-end: a short-interval task left across real downtime performs
+    exactly one catch-up run and then resumes.
 
 [Unreleased]: https://github.com/shruggietech/go-scheduler/commits/main
