@@ -6,6 +6,9 @@
 *.so
 *.dylib
 
+# Generated Windows resource object (created in CI from versioninfo.json + icon.ico)
+*.syso
+
 # Test & coverage artifacts
 *.test
 *.out

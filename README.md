@@ -70,7 +70,14 @@ macOS, Windows). Extract it and run the GUI — it **auto-starts the background 
 time, so there's nothing to configure:
 
 ```sh
-./gosched-gui        # opens the window; starts the daemon in the background if needed
+./gosched-gui        # Linux & Windows: opens the window; starts the daemon if needed
+```
+
+On **macOS** the GUI ships as `gosched-gui.app` (the daemon and CLI live inside it), so launch it
+the Mac way:
+
+```sh
+open gosched-gui.app
 ```
 
 > The auto-started daemon keeps running so your tasks fire even after you close the window. For

@@ -1,0 +1,15 @@
+{
+  "FixedFileInfo": {
+    "FileVersion": {"Major": 0, "Minor": 0, "Patch": 0, "Build": 0},
+    "ProductVersion": {"Major": 0, "Minor": 0, "Patch": 0, "Build": 0}
+  },
+  "StringFileInfo": {
+    "CompanyName": "ShruggieTech",
+    "ProductName": "go-scheduler",
+    "FileDescription": "go-scheduler desktop GUI",
+    "LegalCopyright": "© 2026 ShruggieTech",
+    "OriginalFilename": "gosched-gui.exe",
+    "InternalName": "gosched-gui"
+  },
+  "IconPath": "icon.ico"
+}

@@ -116,6 +116,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgl1-mesa-dev xorg-dev libxkbcommon-dev
 
+      # Embed the .exe file icon (shown in Explorer/taskbar) via a generated COFF
+      # resource. The .syso is built here, not committed: a Windows-format .syso
+      # would break the CGO-free `go build ./...` path on other platforms, and it
+      # only links cleanly under the external (cgo) linker the GUI build uses.
+      - name: Generate Windows executable icon resource
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          go run github.com/josephspurrier/goversioninfo/cmd/goversioninfo@v1.4.1 \
+            -icon=cmd/gosched-gui/icon.ico \
+            -o=cmd/gosched-gui/resource_windows_amd64.syso \
+            cmd/gosched-gui/versioninfo.json
+
       - name: Build the self-contained desktop bundle (GUI + daemon + CLI)
         shell: bash
         env:
@@ -133,6 +146,45 @@ jobs:
           go build -ldflags "$BASE" -o "$stage/goschedd${{ matrix.ext }}" ./cmd/goschedd
           go build -ldflags "$BASE" -o "$stage/gosched${{ matrix.ext }}" ./cmd/gosched
           cp README.md LICENSE CHANGELOG.md "$stage/"
+          if [ "${{ matrix.goos }}" = "darwin" ]; then
+            # Wrap the GUI in a .app so Finder/Dock show the icon. The daemon and
+            # CLI live beside the GUI binary inside the bundle, so the GUI's
+            # "daemon next to me" autostart lookup still resolves.
+            app="$stage/gosched-gui.app"
+            mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
+            mv "$stage/gosched-gui" "$stage/goschedd" "$stage/gosched" "$app/Contents/MacOS/"
+            # Build the .icns from the source PNG with Apple's own tools (canonical,
+            # always valid) rather than committing a pre-baked icns.
+            iconset="$stage/icon.iconset"; mkdir -p "$iconset"
+            sips -z 16 16   gui/assets/icon.png --out "$iconset/icon_16x16.png"      >/dev/null
+            sips -z 32 32   gui/assets/icon.png --out "$iconset/icon_16x16@2x.png"   >/dev/null
+            sips -z 32 32   gui/assets/icon.png --out "$iconset/icon_32x32.png"      >/dev/null
+            sips -z 64 64   gui/assets/icon.png --out "$iconset/icon_32x32@2x.png"   >/dev/null
+            sips -z 128 128 gui/assets/icon.png --out "$iconset/icon_128x128.png"    >/dev/null
+            sips -z 256 256 gui/assets/icon.png --out "$iconset/icon_128x128@2x.png" >/dev/null
+            sips -z 256 256 gui/assets/icon.png --out "$iconset/icon_256x256.png"    >/dev/null
+            sips -z 512 512 gui/assets/icon.png --out "$iconset/icon_256x256@2x.png" >/dev/null
+            sips -z 512 512 gui/assets/icon.png --out "$iconset/icon_512x512.png"    >/dev/null
+            cp gui/assets/icon.png "$iconset/icon_512x512@2x.png"
+            iconutil -c icns "$iconset" -o "$app/Contents/Resources/icon.icns"
+            rm -rf "$iconset"
+            cat > "$app/Contents/Info.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key><string>go-scheduler</string>
+            <key>CFBundleDisplayName</key><string>go-scheduler</string>
+            <key>CFBundleExecutable</key><string>gosched-gui</string>
+            <key>CFBundleIdentifier</key><string>tech.shruggie.goscheduler</string>
+            <key>CFBundleShortVersionString</key><string>${VERSION#v}</string>
+            <key>CFBundleIconFile</key><string>icon.icns</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>NSHighResolutionCapable</key><true/>
+          </dict>
+          </plist>
+          PLIST
+          fi
           mkdir -p dist
           if [ "${{ matrix.goos }}" = "windows" ]; then
             7z a "dist/${stage}.zip" "$stage" >/dev/null
