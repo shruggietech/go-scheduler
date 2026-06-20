@@ -1,5 +1,9 @@
 # go-scheduler
 
+[![CI](https://github.com/shruggietech/go-scheduler/actions/workflows/ci.yml/badge.svg)](https://github.com/shruggietech/go-scheduler/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/shruggietech/go-scheduler)](https://github.com/shruggietech/go-scheduler/releases/latest)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+
 A cross-platform (Linux · macOS · Windows) **task scheduler** written in Go — cron-level power
 without the cryptic syntax. CLI-first, with a Go-native Material Design desktop GUI built on top.
 
@@ -49,6 +53,19 @@ cmd/        goschedd (daemon) · gosched (CLI) · gosched-gui (Fyne GUI)
 internal/   engine · schedule · task · trigger · store · executor · catchup · timezone · api · ipc · service · config · platform
 gui/        Fyne views (calendar, editor, alerts, groups)
 specs/      spec-driven development artifacts (spec, plan, tasks, contracts)
+```
+
+## Install
+
+Download the archive for your platform from the
+[latest release](https://github.com/shruggietech/go-scheduler/releases/latest) (binaries are
+provided for Linux, macOS, and Windows on amd64 and arm64), verify it against `SHA256SUMS.txt`,
+extract, then register the system service:
+
+```sh
+sudo ./gosched service install   # admin/root required
+sudo ./gosched service start
+./gosched task add hello --command /usr/bin/true --schedule "every weekday at 09:00"
 ```
 
 ## Development
