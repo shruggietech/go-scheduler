@@ -44,5 +44,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     kardianos; the daemon runs under the OS service manager (start on boot).
   - Verified end-to-end: create recurring + one-off tasks via CLI, run them, inspect history and
     failure alerts; DST handled correctly across the year.
+- **User Story 3 — Nested task groups (Phase 5, tasks T049–T054):**
+  - `internal/task` — pure, testable group-tree logic: cascading enabled-state resolution,
+    descendant enumeration, cycle detection, forest building.
+  - `internal/store` — group chain-enabled queries, parent validation, reparent with cycle
+    rejection, rename, and tree retrieval.
+  - Engine respects the group chain: disabling an ancestor group stops its tasks from being
+    scheduled (without mutating each task's own enabled flag); re-enabling restores them.
+  - Local API: group CRUD, tree view, reparent (PATCH), enable/disable. CLI: `group add/list
+    [--tree]/enable/disable/rm`.
+  - Verified end-to-end: 3-level hierarchy, cascade disable, cycle rejection.
+  - Note: the GUI group tree (T055) is deferred until the US2 GUI exists.
 
 [Unreleased]: https://github.com/shruggietech/go-scheduler/commits/main

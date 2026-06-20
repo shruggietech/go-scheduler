@@ -145,16 +145,16 @@ all contained tasks stop — in both CLI and GUI.
 
 ### Tests for User Story 3
 
-- [ ] T049 [P] [US3] Unit-test cascade enable/disable + parent-cycle rejection in `internal/task/group_test.go`
-- [ ] T050 [US3] Integration-test 3-level nesting + disable cascade stops runs in `test/integration/groups_test.go`
+- [x] T049 [P] [US3] Unit-test cascade enable/disable + parent-cycle rejection in `internal/task/group_test.go`
+- [x] T050 [US3] Integration-test 3-level nesting + disable cascade stops runs in `test/integration/groups_test.go`
 
 ### Implementation for User Story 3
 
-- [ ] T051 [US3] Implement group tree queries (descendants) + cycle prevention in `internal/store/group.go`
-- [ ] T052 [US3] Implement group cascade enable/disable + effective-enabled resolution used by the engine in `internal/task/group.go`
-- [ ] T053 [US3] Implement API group endpoints (CRUD, tree, `:enable`/`:disable`) in `internal/api/server/groups.go`
-- [ ] T054 [US3] Implement CLI `gosched group add/list --tree/enable/disable/rm` in `internal/cli/group.go`
-- [ ] T055 [US3] Implement GUI group tree view + assign-task-to-group in `gui/groups.go`
+- [x] T051 [US3] Implement group tree queries (descendants) + cycle prevention in `internal/store/group.go`
+- [x] T052 [US3] Implement group cascade enable/disable + effective-enabled resolution used by the engine in `internal/task/group.go`
+- [x] T053 [US3] Implement API group endpoints (CRUD, tree, `:enable`/`:disable`) in `internal/api/server/groups.go`
+- [x] T054 [US3] Implement CLI `gosched group add/list --tree/enable/disable/rm` in `internal/cli/group.go`
+- [ ] T055 [US3] (deferred until US2 GUI exists) Implement GUI group tree view + assign-task-to-group in `gui/groups.go`
 
 **Checkpoint**: US1–US3 independently functional.
 

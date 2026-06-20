@@ -74,8 +74,12 @@ func nullInt(p *int) sql.NullInt64 {
 
 // ---- Group --------------------------------------------------------------
 
-// CreateGroup inserts g, assigning an ID and timestamps when empty.
+// CreateGroup inserts g, assigning an ID and timestamps when empty. A non-empty
+// ParentID must reference an existing group.
 func (s *Store) CreateGroup(g *domain.Group) error {
+	if err := s.ValidateParent("", g.ParentID); err != nil {
+		return err
+	}
 	if g.ID == "" {
 		g.ID = newID()
 	}
