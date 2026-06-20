@@ -16,5 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Implementation plan, research, data model, CLI & local-API contracts, and quickstart.
   - Dependency-ordered task breakdown (78 tasks across 8 phases).
 - Repository basics: Apache 2.0 license, README, changelog, and TODO.
+- **Foundational implementation (Phases 1–2, tasks T001–T019):**
+  - Go module, `golangci-lint` config, `Makefile`, and `.gitattributes`.
+  - `internal/platform` — build-tagged data dirs and windowless process-spawn helper.
+  - `internal/clock` — injectable `Clock` with real and deterministic fake implementations.
+  - `internal/config` — single config schema, fail-fast validation, structured `slog` logging.
+  - `internal/domain` + `internal/store` — core entities and durable SQLite persistence
+    (pure-Go, cgo-free) with migrations and CRUD.
+  - `internal/ipc` — local transport (Unix socket / Windows named pipe).
+  - `internal/api` — local HTTP/JSON API server (health, error envelope) and shared client.
+  - `cmd/goschedd` (daemon) and `cmd/gosched` (CLI): the daemon serves health over IPC and the
+    CLI reaches it — end-to-end architecture verified.
 
 [Unreleased]: https://github.com/shruggietech/go-scheduler/commits/main

@@ -1,0 +1,13 @@
+# Normalize line endings: LF in the repo for text files.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF.
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binaries.
+*.exe binary
+*.dll binary
+*.png binary
+*.ico binary

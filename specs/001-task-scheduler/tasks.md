@@ -48,15 +48,15 @@ implementation and testing.
 - [x] T008 [P] Implement config schema, defaults, and fail-fast validation in `internal/config/config.go` (data dir, IPC path, admin group, default tz, log level/format, output cap, worker-pool size)
 - [x] T009 [P] Unit-test config validation (bad tz, bad paths, defaults) in `internal/config/config_test.go`
 - [x] T010 [P] Set up `log/slog` structured logging (JSON + human handlers, consistent fields) in `internal/config/logging.go`
-- [ ] T011 Implement SQLite store bootstrap + schema migrations (modernc.org/sqlite) in `internal/store/store.go` and `internal/store/migrations/`
-- [ ] T012 [P] Implement base domain models Group, Task, Schedule, Run, Alert (UTC timestamps, enums) in `internal/task/` and `internal/schedule/types.go`
-- [ ] T013 Implement store CRUD for Group, Task, Schedule, Run, Alert (transactional) in `internal/store/*.go`
-- [ ] T014 Integration-test store CRUD + durability across reopen in `test/integration/store_test.go`
-- [ ] T015 Implement IPC transport: Unix domain socket (`ipc_unix.go`) and Windows named pipe via go-winio (`ipc_windows.go`) behind build tags in `internal/ipc/`
-- [ ] T016 Implement local API server skeleton (router, JSON error envelope, `/v1/health`) over the IPC listener in `internal/api/server/server.go`
-- [ ] T017 [P] Implement shared API client in `internal/api/client/client.go` (used by CLI + GUI)
-- [ ] T018 [P] Contract-test `/v1/health` and error envelope in `internal/api/server/health_test.go`
-- [ ] T019 Implement daemon skeleton wiring config → store → api server → (engine placeholder) in `cmd/goschedd/main.go`
+- [x] T011 Implement SQLite store bootstrap + schema migrations (modernc.org/sqlite) in `internal/store/store.go` and `internal/store/migrations/`
+- [x] T012 [P] Implement base domain models Group, Task, Schedule, Run, Alert (UTC timestamps, enums) in `internal/task/` and `internal/schedule/types.go`
+- [x] T013 Implement store CRUD for Group, Task, Schedule, Run, Alert (transactional) in `internal/store/*.go`
+- [x] T014 Integration-test store CRUD + durability across reopen in `test/integration/store_test.go`
+- [x] T015 Implement IPC transport: Unix domain socket (`ipc_unix.go`) and Windows named pipe via go-winio (`ipc_windows.go`) behind build tags in `internal/ipc/`
+- [x] T016 Implement local API server skeleton (router, JSON error envelope, `/v1/health`) over the IPC listener in `internal/api/server/server.go`
+- [x] T017 [P] Implement shared API client in `internal/api/client/client.go` (used by CLI + GUI)
+- [x] T018 [P] Contract-test `/v1/health` and error envelope in `internal/api/server/health_test.go`
+- [x] T019 Implement daemon skeleton wiring config → store → api server → (engine placeholder) in `cmd/goschedd/main.go`
 
 **Checkpoint**: Daemon starts, serves health over local IPC, persists base entities.
 
