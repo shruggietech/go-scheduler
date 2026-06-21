@@ -135,12 +135,14 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          dotnet tool install --global wix --version 5.*
+          # Pin WiX and its extensions to the SAME version — a floating extension
+          # version (e.g. 7.x) is incompatible with a 5.x toolset (WIX6101).
+          dotnet tool install --global wix --version 5.0.2
           wix --version
           # Extensions used by goschedule.wxs: WixUI (install wizard) + Util
           # (CloseApplication for stale-daemon termination).
-          wix extension add -g WixToolset.UI.wixext
-          wix extension add -g WixToolset.Util.wixext
+          wix extension add -g WixToolset.UI.wixext/5.0.2
+          wix extension add -g WixToolset.Util.wixext/5.0.2
 
       - name: Build the self-contained desktop bundle (GUI + daemon + CLI)
         shell: bash
