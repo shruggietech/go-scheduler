@@ -137,6 +137,10 @@ jobs:
         run: |
           dotnet tool install --global wix --version 5.*
           wix --version
+          # Extensions used by goschedule.wxs: WixUI (install wizard) + Util
+          # (CloseApplication for stale-daemon termination).
+          wix extension add -g WixToolset.UI.wixext
+          wix extension add -g WixToolset.Util.wixext
 
       - name: Build the self-contained desktop bundle (GUI + daemon + CLI)
         shell: bash
@@ -201,6 +205,7 @@ jobs:
             pwsh build/windows/verify_wxs.ps1 -StageDir "$stage"
             VER_NUMERIC="${VERSION#v}"
             wix build build/windows/goschedule.wxs -arch x64 \
+              -ext WixToolset.UI.wixext -ext WixToolset.Util.wixext \
               -d Version="${VER_NUMERIC}" \
               -d StageDir="$(pwd -W 2>/dev/null || pwd)/${stage}" \
               -o "dist/go-schedule_${VERSION}_windows_amd64.msi"

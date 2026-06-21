@@ -7,6 +7,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/kardianos/service"
 )
@@ -26,7 +27,16 @@ type program struct {
 func (p *program) Start(service.Service) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	p.cancel = cancel
-	go func() { _ = p.runFn(ctx) }()
+	go func() {
+		// A non-nil error means a fatal startup/runtime failure (e.g. the IPC pipe
+		// is already in use by another daemon). Exit non-zero so the service
+		// manager reflects the failure instead of reporting a zombie "running"
+		// service that serves nothing. Normal shutdown (ctx cancel) returns nil.
+		if err := p.runFn(ctx); err != nil {
+			fmt.Fprintln(os.Stderr, "goschedd: fatal:", err)
+			os.Exit(1)
+		}
+	}()
 	return nil
 }
 

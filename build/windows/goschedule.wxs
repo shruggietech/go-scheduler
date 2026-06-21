@@ -23,7 +23,9 @@
     * Version must be numeric (e.g. 1.2.3); strip any leading "v" before passing.
     * StageDir is the folder holding the three built .exe files.
 -->
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
   <Package
       Name="go-schedule"
       Manufacturer="ShruggieTech"
@@ -39,6 +41,22 @@
         DowngradeErrorMessage="A newer version of go-schedule is already installed." />
 
     <MediaTemplate EmbedCab="yes" />
+
+    <!-- Before installing files, terminate any running daemon (a leftover from a
+         prior version or a non-service dev instance) so it can't hold the IPC
+         pipe or lock the .exe being replaced. Best-effort: missing process is
+         fine. The service's own daemon is stopped by ServiceControl on upgrade;
+         this also clears any stray process. -->
+    <util:CloseApplication
+        Id="CloseStaleDaemon"
+        Target="goschedd.exe"
+        TerminateProcess="1"
+        RebootPrompt="no" />
+
+    <!-- A simple, themed install wizard so the user gets a clear Welcome and a
+         "Completed successfully" finish page (instead of a silent progress bar). -->
+    <ui:WixUI Id="WixUI_Minimal" />
+    <WixVariable Id="WixUILicenseRtf" Value="build/windows/license.rtf" />
 
     <!-- Install location: C:\Program Files\go-schedule\ -->
     <StandardDirectory Id="ProgramFiles64Folder">
